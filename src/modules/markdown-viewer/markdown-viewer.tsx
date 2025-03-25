@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { MarkdownFile, FileTreeItem, UploadProgress } from './types';
 import { processMarkdownFile } from './helpers/markdown-processor';
@@ -15,6 +14,8 @@ const FileTree = lazy(() => import('./components/client/file-tree'));
 
 // This represents a module facade that will be rendered in the page
 const MarkdownViewer: React.FC = () => {
+  console.log('MarkdownViewer component rendering');
+  
   // State for markdown files
   const [files, setFiles] = useState<MarkdownFile[]>([]);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
