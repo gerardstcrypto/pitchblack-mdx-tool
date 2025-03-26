@@ -1,7 +1,8 @@
+
 import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { MarkdownFile, FileTreeItem, UploadProgress } from './types';
 import { processMarkdownFile } from './helpers/markdown-processor';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 // SSR Components (load immediately)
 import MdxRenderer from './components/ssr/mdx-renderer';

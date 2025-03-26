@@ -3,7 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { Upload, FileText } from 'lucide-react';
 import { UploadProgress } from '../../types';
 import { isMarkdownFile } from '../../helpers/markdown-processor';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface FileUploadProps {
   onFileUpload: (files: File[]) => void;
