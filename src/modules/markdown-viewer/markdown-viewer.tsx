@@ -9,8 +9,8 @@ import useKeyboardShortcuts from './hooks/use-keyboard-shortcuts';
 
 // SSR Components (load immediately)
 import MdxRenderer from './components/ssr/mdx-renderer';
-import FileUpload from './components/client/file-upload';
 import CopyButton from './components/client/copy-button';
+import FileUpload from './components/client/file-upload';
 
 // Lazy loaded client components (load after initial render)
 const Editor = lazy(() => import('./components/client/editor'));
@@ -172,28 +172,25 @@ const MarkdownViewer: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Left sidebar with file tree */}
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="border-r border-muted">
+          <ResizablePanel defaultSize={15} minSize={15} maxSize={30} className="border-r border-muted">
             <div className="flex flex-col h-full">
-              <div className="flex items-center justify-between p-2 border-b border-muted h-10">
-                <span className="text-sm font-medium">Files</span>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
-                  <FileTree 
-                    files={fileTreeItems} 
-                    onSelectFile={handleSelectFile}
-                    onDeleteFile={handleDeleteFile}
-                    onClearAll={handleClearAll}
-                  />
-                </Suspense>
-              </div>
+              <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
+                <FileTree 
+                  files={fileTreeItems} 
+                  onSelectFile={handleSelectFile}
+                  onDeleteFile={handleDeleteFile}
+                  onClearAll={handleClearAll}
+                  onFileUpload={handleFileUpload}
+                  uploadProgress={uploadProgress}
+                />
+              </Suspense>
             </div>
           </ResizablePanel>
           
           <ResizableHandle withHandle />
           
           {/* Main editor and preview area */}
-          <ResizablePanel defaultSize={80}>
+          <ResizablePanel defaultSize={85}>
             <ResizablePanelGroup direction="horizontal">
               {/* Editor panel */}
               <ResizablePanel defaultSize={50}>
@@ -222,14 +219,6 @@ const MarkdownViewer: React.FC = () => {
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
-      </div>
-
-      {/* Bottom panel for uploading files */}
-      <div className="p-4 border-t border-muted">
-        <FileUpload 
-          onFileUpload={handleFileUpload} 
-          uploadProgress={uploadProgress}
-        />
       </div>
     </div>
   );
