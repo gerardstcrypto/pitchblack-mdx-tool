@@ -136,26 +136,45 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
   // First highlight code blocks
   let html = highlightCodeBlocks(markdown);
   
-  // Apply basic markdown transformations for non-code parts
-  // Replace new lines with <br>
-  html = html.replace(/\n(?!<\/code>|<\/pre>)/g, '<br>');
-  
-  // Replace headings (but not within code blocks)
-  html = html.replace(/(?<!```[\s\S]*?)#{6}\s(.+?)(?=<br>|$)/g, '<h6>$1</h6>');
-  html = html.replace(/(?<!```[\s\S]*?)#{5}\s(.+?)(?=<br>|$)/g, '<h5>$1</h5>');
-  html = html.replace(/(?<!```[\s\S]*?)#{4}\s(.+?)(?=<br>|$)/g, '<h4>$1</h4>');
-  html = html.replace(/(?<!```[\s\S]*?)#{3}\s(.+?)(?=<br>|$)/g, '<h3>$1</h3>');
-  html = html.replace(/(?<!```[\s\S]*?)#{2}\s(.+?)(?=<br>|$)/g, '<h2>$1</h2>');
-  html = html.replace(/(?<!```[\s\S]*?)#{1}\s(.+?)(?=<br>|$)/g, '<h1>$1</h1>');
-  
-  // Replace bold
-  html = html.replace(/(?<!```[\s\S]*?)\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  
-  // Replace italic
-  html = html.replace(/(?<!```[\s\S]*?)\*(.+?)\*/g, '<em>$1</em>');
-  
-  // Replace inline code (but not inside already processed code blocks)
-  html = html.replace(/(?<!<code[^>]*>[\s\S]*?)`([^`]+?)`(?![\s\S]*?<\/code>)/g, '<code>$1</code>');
+  // Process paragraphs - split by double newlines first (to preserve intended paragraphs)
+  // This approach handles paragraphs before inline formatting
+  const paragraphs = html.split(/\n\n+/);
+  html = paragraphs.map(paragraph => {
+    // Skip processing if this is already a code block
+    if (paragraph.trim().startsWith('<pre class="language-')) {
+      return paragraph;
+    }
+    
+    // Apply basic markdown transformations for non-code parts
+    let processedParagraph = paragraph;
+    
+    // Replace headings (but not within code blocks)
+    processedParagraph = processedParagraph.replace(/^#{6}\s(.+?)$/gm, '<h6>$1</h6>');
+    processedParagraph = processedParagraph.replace(/^#{5}\s(.+?)$/gm, '<h5>$1</h5>');
+    processedParagraph = processedParagraph.replace(/^#{4}\s(.+?)$/gm, '<h4>$1</h4>');
+    processedParagraph = processedParagraph.replace(/^#{3}\s(.+?)$/gm, '<h3>$1</h3>');
+    processedParagraph = processedParagraph.replace(/^#{2}\s(.+?)$/gm, '<h2>$1</h2>');
+    processedParagraph = processedParagraph.replace(/^#{1}\s(.+?)$/gm, '<h1>$1</h1>');
+    
+    // Replace bold
+    processedParagraph = processedParagraph.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Replace italic
+    processedParagraph = processedParagraph.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    
+    // Replace inline code (but not inside already processed code blocks)
+    processedParagraph = processedParagraph.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    
+    // Handle line breaks within paragraphs (single newlines)
+    processedParagraph = processedParagraph.replace(/\n/g, '<br>');
+    
+    // If it's not a heading, wrap in paragraph tags
+    if (!/^<h[1-6]>/.test(processedParagraph)) {
+      return `<p>${processedParagraph}</p>`;
+    }
+    
+    return processedParagraph;
+  }).join('\n\n');
   
   return html;
 };

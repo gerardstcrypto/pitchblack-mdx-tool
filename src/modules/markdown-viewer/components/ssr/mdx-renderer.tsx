@@ -25,7 +25,7 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content }) => {
   return (
     <ScrollArea className="h-full w-full">
       <div 
-        className="mdx-renderer p-6 min-h-full"
+        className="mdx-renderer p-6 min-h-full prose prose-invert max-w-none"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </ScrollArea>
