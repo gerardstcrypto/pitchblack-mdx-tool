@@ -34,25 +34,25 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content }) => {
     // Replace ```language\ncontent\n``` with <pre><code class="language-{language}">content</code></pre>
     .replace(/```(\w*)([\s\S]*?)```/g, (_, language, code) => {
       const lang = language || 'markup';
-      return `<pre class="language-${lang} overflow-x-auto max-w-full"><code class="language-${lang}">${code.trim()}</code></pre>`;
+      return `<pre class="language-${lang} overflow-x-auto max-w-full rounded-md"><code class="language-${lang}">${code.trim()}</code></pre>`;
     })
     // Add paragraph wrapping
     .replace(/(?:^|\n\n)([^\n]+)(?:\n\n|$)/g, (_, text) => {
       if (text.trim().startsWith('<pre') || text.trim() === '') {
         return `\n\n${text}\n\n`;
       }
-      return `\n\n<p>${text}</p>\n\n`;
+      return `\n\n<p class="my-4">${text}</p>\n\n`;
     })
     // Replace single newlines with <br> in paragraphs
-    .replace(/<p>([\s\S]*?)<\/p>/g, (match, content) => {
-      return `<p>${content.replace(/\n/g, '<br>')}</p>`;
+    .replace(/<p[^>]*>([\s\S]*?)<\/p>/g, (match, content) => {
+      return `<p class="my-4">${content.replace(/\n/g, '<br>')}</p>`;
     });
 
   return (
     <ScrollArea className="h-full">
       <div 
         ref={containerRef}
-        className="prose prose-sm dark:prose-invert max-w-none p-4 overflow-x-hidden"
+        className="prose prose-sm dark:prose-invert max-w-none px-6 py-4 overflow-hidden mdx-renderer"
         dangerouslySetInnerHTML={{ __html: processedContent }} 
       />
     </ScrollArea>

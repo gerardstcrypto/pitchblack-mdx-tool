@@ -10,7 +10,6 @@ import useKeyboardShortcuts from './hooks/use-keyboard-shortcuts';
 // SSR Components (load immediately)
 import MdxRenderer from './components/ssr/mdx-renderer';
 import CopyButton from './components/client/copy-button';
-import FileUpload from './components/client/file-upload';
 
 // Lazy loaded client components (load after initial render)
 const Editor = lazy(() => import('./components/client/editor'));
@@ -171,8 +170,8 @@ const MarkdownViewer: React.FC = () => {
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Left sidebar with file tree */}
-          <ResizablePanel defaultSize={15} minSize={15} maxSize={30} className="border-r border-muted">
+          {/* Left sidebar with file tree - make it narrower by default */}
+          <ResizablePanel defaultSize={12} minSize={12} maxSize={30} className="border-r border-muted">
             <div className="flex flex-col h-full">
               <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
                 <FileTree 
@@ -190,7 +189,7 @@ const MarkdownViewer: React.FC = () => {
           <ResizableHandle withHandle />
           
           {/* Main editor and preview area */}
-          <ResizablePanel defaultSize={85}>
+          <ResizablePanel defaultSize={88}>
             <ResizablePanelGroup direction="horizontal">
               {/* Editor panel */}
               <ResizablePanel defaultSize={50}>

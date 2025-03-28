@@ -28,7 +28,7 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
 
   return (
     <div className="relative h-full flex flex-col" ref={editorRef}>
-      <div className="flex items-center justify-between p-2 border-b border-muted shrink-0 h-10">
+      <div className="flex items-center justify-between p-2 border-b border-muted h-10 shrink-0">
         <span className="text-sm font-medium">Markdown Input</span>
         <div className="flex items-center gap-1">
           <PasteButton onPaste={handlePaste} />
@@ -39,7 +39,7 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         <Textarea
           value={content}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full min-h-[400px] p-4 bg-transparent resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 font-mono text-sm"
+          className="w-full h-full min-h-[400px] px-6 py-4 bg-transparent resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 font-mono text-sm"
           spellCheck="false"
           placeholder="Write or paste your markdown here..."
         />
