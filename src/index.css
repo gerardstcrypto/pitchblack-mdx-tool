@@ -78,7 +78,13 @@
   }
 
   pre {
-    @apply rounded-md p-4 my-4 bg-secondary overflow-auto;
+    @apply rounded-md p-4 my-4 bg-secondary overflow-auto max-w-full;
+    width: 100%;
+  }
+  
+  pre code {
+    @apply break-words whitespace-pre-wrap overflow-x-auto;
+    max-width: 100%;
   }
 
   code {

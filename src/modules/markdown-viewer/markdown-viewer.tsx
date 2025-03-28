@@ -4,6 +4,8 @@ import { MarkdownFile, FileTreeItem, UploadProgress } from './types';
 import { processMarkdownFile } from './helpers/markdown-processor';
 import { toast } from "sonner";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import SettingsPanel from './components/client/settings-panel';
+import useKeyboardShortcuts from './hooks/use-keyboard-shortcuts';
 
 // SSR Components (load immediately)
 import MdxRenderer from './components/ssr/mdx-renderer';
@@ -17,6 +19,9 @@ const FileTree = lazy(() => import('./components/client/file-tree'));
 // This represents a module facade that will be rendered in the page
 const MarkdownViewer: React.FC = () => {
   console.log('MarkdownViewer component rendering');
+  
+  // Use keyboard shortcuts
+  useKeyboardShortcuts();
   
   // State for markdown files
   const [files, setFiles] = useState<MarkdownFile[]>([]);
@@ -158,19 +163,31 @@ const MarkdownViewer: React.FC = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col">
+      {/* Top bar with settings */}
+      <div className="flex items-center justify-end h-10 px-4 border-b border-muted">
+        <SettingsPanel />
+      </div>
+      
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Left sidebar with file tree */}
           <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="border-r border-muted">
-            <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
-              <FileTree 
-                files={fileTreeItems} 
-                onSelectFile={handleSelectFile}
-                onDeleteFile={handleDeleteFile}
-                onClearAll={handleClearAll}
-              />
-            </Suspense>
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between p-2 border-b border-muted h-10">
+                <span className="text-sm font-medium">Files</span>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
+                  <FileTree 
+                    files={fileTreeItems} 
+                    onSelectFile={handleSelectFile}
+                    onDeleteFile={handleDeleteFile}
+                    onClearAll={handleClearAll}
+                  />
+                </Suspense>
+              </div>
+            </div>
           </ResizablePanel>
           
           <ResizableHandle withHandle />
@@ -193,7 +210,7 @@ const MarkdownViewer: React.FC = () => {
               {/* Rendered preview panel */}
               <ResizablePanel defaultSize={50}>
                 <div className="flex flex-col h-full">
-                  <div className="flex items-center justify-between p-2 border-b border-muted">
+                  <div className="flex items-center justify-between p-2 border-b border-muted h-10">
                     <span className="text-sm font-medium">Rendered Output</span>
                     <CopyButton textToCopy={selectedFileContent} />
                   </div>

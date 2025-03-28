@@ -4,6 +4,15 @@ import { simpleMarkdownToHtml } from '../../helpers/markdown-processor';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import 'prismjs/themes/prism-tomorrow.css'; // Dark theme for code highlighting
 
+// Add a global declaration for Prism to avoid TypeScript errors
+declare global {
+  interface Window {
+    Prism: {
+      highlightAll: () => void;
+    };
+  }
+}
+
 interface MdxRendererProps {
   content: string;
 }

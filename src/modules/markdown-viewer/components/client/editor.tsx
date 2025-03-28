@@ -1,6 +1,7 @@
 
 import React, { useRef, useEffect } from 'react';
 import CopyButton from './copy-button';
+import PasteButton from './paste-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -21,11 +22,18 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     }
   }, []);
 
+  const handlePaste = (text: string) => {
+    onChange(content + text);
+  };
+
   return (
     <div className="relative h-full flex flex-col" ref={editorRef}>
-      <div className="flex items-center justify-between p-2 border-b border-muted shrink-0">
+      <div className="flex items-center justify-between p-2 border-b border-muted shrink-0 h-10">
         <span className="text-sm font-medium">Markdown Input</span>
-        <CopyButton textToCopy={content} />
+        <div className="flex items-center gap-1">
+          <PasteButton onPaste={handlePaste} />
+          <CopyButton textToCopy={content} />
+        </div>
       </div>
       <ScrollArea className="flex-1 h-[calc(100%-40px)]">
         <Textarea
