@@ -25,3 +25,10 @@ export interface MarkdownViewerState {
   editorContent: string;
   uploadProgress: Record<string, UploadProgress>;
 }
+
+// For Prism global declaration
+declare global {
+  interface Window {
+    Prism: typeof import('prismjs');
+  }
+}

@@ -3,6 +3,7 @@ import React, { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { MarkdownFile, FileTreeItem, UploadProgress } from './types';
 import { processMarkdownFile } from './helpers/markdown-processor';
 import { toast } from "sonner";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 // SSR Components (load immediately)
 import MdxRenderer from './components/ssr/mdx-renderer';
@@ -156,42 +157,54 @@ const MarkdownViewer: React.FC = () => {
   }, [selectedFileId]);
 
   return (
-    <div className="min-h-screen w-full flex flex-col">
+    <div className="fixed inset-0 flex flex-col">
       {/* Main content area */}
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Left sidebar with file tree */}
-        <div className="w-full lg:w-64 border-r border-muted overflow-hidden lg:h-screen">
-          <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
-            <FileTree 
-              files={fileTreeItems} 
-              onSelectFile={handleSelectFile}
-              onDeleteFile={handleDeleteFile}
-              onClearAll={handleClearAll}
-            />
-          </Suspense>
-        </div>
-
-        {/* Main editor and preview area */}
-        <div className="flex-1 flex flex-col md:flex-row">
-          {/* Editor panel */}
-          <div className="w-full md:w-1/2 border-r border-muted h-[calc(100vh-13rem)] md:h-screen">
-            <Suspense fallback={<div className="p-4">Loading editor...</div>}>
-              <Editor 
-                content={editorContent} 
-                onChange={handleEditorChange} 
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Left sidebar with file tree */}
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="border-r border-muted">
+            <Suspense fallback={<div className="p-4 text-center">Loading files...</div>}>
+              <FileTree 
+                files={fileTreeItems} 
+                onSelectFile={handleSelectFile}
+                onDeleteFile={handleDeleteFile}
+                onClearAll={handleClearAll}
               />
             </Suspense>
-          </div>
+          </ResizablePanel>
           
-          {/* Rendered preview panel */}
-          <div className="w-full md:w-1/2 h-[calc(100vh-13rem)] md:h-screen overflow-hidden">
-            <div className="flex items-center justify-between p-2 border-b border-muted">
-              <span className="text-sm font-medium">Rendered Output</span>
-              <CopyButton textToCopy={selectedFileContent} />
-            </div>
-            <MdxRenderer content={selectedFileContent} />
-          </div>
-        </div>
+          <ResizableHandle withHandle />
+          
+          {/* Main editor and preview area */}
+          <ResizablePanel defaultSize={80}>
+            <ResizablePanelGroup direction="horizontal">
+              {/* Editor panel */}
+              <ResizablePanel defaultSize={50}>
+                <Suspense fallback={<div className="p-4">Loading editor...</div>}>
+                  <Editor 
+                    content={editorContent} 
+                    onChange={handleEditorChange} 
+                  />
+                </Suspense>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              {/* Rendered preview panel */}
+              <ResizablePanel defaultSize={50}>
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center justify-between p-2 border-b border-muted">
+                    <span className="text-sm font-medium">Rendered Output</span>
+                    <CopyButton textToCopy={selectedFileContent} />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <MdxRenderer content={selectedFileContent} />
+                  </div>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
       {/* Bottom panel for uploading files */}
