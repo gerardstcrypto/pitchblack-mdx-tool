@@ -81,7 +81,7 @@ const findCodeBlocks = (markdown: string): { language: string, code: string, ori
   return matches;
 };
 
-// Apply syntax highlighting to code blocks
+// Apply syntax highlighting to code blocks while preserving newlines
 const highlightCodeBlocks = (markdown: string): string => {
   const codeBlocks = findCodeBlocks(markdown);
   let result = markdown;
@@ -111,10 +111,14 @@ const highlightCodeBlocks = (markdown: string): string => {
     try {
       // Make sure the language is loaded in Prism
       if (Prism.languages[prismLanguage]) {
-        highlighted = Prism.highlight(code, Prism.languages[prismLanguage], prismLanguage);
+        // Process newlines separately to preserve them in the highlighted output
+        const processedCode = code.replace(/\n/g, '\n<br>');
+        highlighted = Prism.highlight(code, Prism.languages[prismLanguage], prismLanguage)
+          .replace(/\n/g, '<br>');
       } else {
         // Fallback to markup if language isn't supported
-        highlighted = Prism.highlight(code, Prism.languages.markup, 'markup');
+        highlighted = Prism.highlight(code, Prism.languages.markup, 'markup')
+          .replace(/\n/g, '<br>');
       }
       
       // Create a highlighted code block with language class

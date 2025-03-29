@@ -32,9 +32,16 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content }) => {
   // Process content for rendering
   const processedContent = content
     // Replace ```language\ncontent\n``` with <pre><code class="language-{language}">content</code></pre>
+    // This captures the code block, including all whitespace and newlines inside
     .replace(/```(\w*)([\s\S]*?)```/g, (_, language, code) => {
       const lang = language || 'markup';
-      return `<pre class="language-${lang} overflow-x-auto max-w-full rounded-md"><code class="language-${lang}">${code.trim()}</code></pre>`;
+      // Preserve original whitespace and newlines in code blocks
+      const processedCode = code.trim()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+      return `<pre class="language-${lang} overflow-x-auto max-w-full rounded-md"><code class="language-${lang}">${processedCode}</code></pre>`;
     })
     // Add paragraph wrapping
     .replace(/(?:^|\n\n)([^\n]+)(?:\n\n|$)/g, (_, text) => {
@@ -44,15 +51,15 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content }) => {
       return `\n\n<p class="my-4">${text}</p>\n\n`;
     })
     // Replace single newlines with <br> in paragraphs
-    .replace(/<p[^>]*>([\s\S]*?)<\/p>/g, (match, content) => {
-      return `<p class="my-4">${content.replace(/\n/g, '<br>')}</p>`;
+    .replace(/<p[^>]*>([\s\S]*?)<\/p>/g, (match, paragraphContent) => {
+      return `<p class="my-4">${paragraphContent.replace(/\n/g, '<br>')}</p>`;
     });
 
   return (
     <ScrollArea className="h-full">
       <div 
         ref={containerRef}
-        className="prose prose-sm dark:prose-invert max-w-none px-6 py-4 overflow-hidden mdx-renderer"
+        className="prose prose-sm dark:prose-invert max-w-none px-6 py-6 overflow-hidden mdx-renderer"
         dangerouslySetInnerHTML={{ __html: processedContent }} 
       />
     </ScrollArea>
