@@ -111,8 +111,6 @@ const highlightCodeBlocks = (markdown: string): string => {
     try {
       // Make sure the language is loaded in Prism
       if (Prism.languages[prismLanguage]) {
-        // Process newlines separately to preserve them in the highlighted output
-        const processedCode = code.replace(/\n/g, '\n<br>');
         highlighted = Prism.highlight(code, Prism.languages[prismLanguage], prismLanguage)
           .replace(/\n/g, '<br>');
       } else {
@@ -122,7 +120,7 @@ const highlightCodeBlocks = (markdown: string): string => {
       }
       
       // Create a highlighted code block with language class
-      const highlightedBlock = `<pre class="language-${prismLanguage}"><code class="language-${prismLanguage}">${highlighted}</code></pre>`;
+      const highlightedBlock = `<pre class="language-${prismLanguage} p-4 my-4"><code class="language-${prismLanguage}">${highlighted}</code></pre>`;
       result = result.replace(original, highlightedBlock);
     } catch (error) {
       console.error(`Error highlighting code block with language ${prismLanguage}:`, error);
@@ -137,8 +135,11 @@ const highlightCodeBlocks = (markdown: string): string => {
 export const simpleMarkdownToHtml = (markdown: string): string => {
   if (!markdown) return '';
   
-  // First highlight code blocks
-  let html = highlightCodeBlocks(markdown);
+  // First process links - [text](url)
+  let html = markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  
+  // Then highlight code blocks
+  html = highlightCodeBlocks(html);
   
   // Process paragraphs - split by double newlines first (to preserve intended paragraphs)
   // This approach handles paragraphs before inline formatting
@@ -153,12 +154,24 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
     let processedParagraph = paragraph;
     
     // Replace headings (but not within code blocks)
-    processedParagraph = processedParagraph.replace(/^#{6}\s(.+?)$/gm, '<h6>$1</h6>');
-    processedParagraph = processedParagraph.replace(/^#{5}\s(.+?)$/gm, '<h5>$1</h5>');
-    processedParagraph = processedParagraph.replace(/^#{4}\s(.+?)$/gm, '<h4>$1</h4>');
-    processedParagraph = processedParagraph.replace(/^#{3}\s(.+?)$/gm, '<h3>$1</h3>');
-    processedParagraph = processedParagraph.replace(/^#{2}\s(.+?)$/gm, '<h2>$1</h2>');
-    processedParagraph = processedParagraph.replace(/^#{1}\s(.+?)$/gm, '<h1>$1</h1>');
+    processedParagraph = processedParagraph.replace(/^#{6}\s(.+?)$/gm, '<h6 class="text-base font-bold my-2">$1</h6>');
+    processedParagraph = processedParagraph.replace(/^#{5}\s(.+?)$/gm, '<h5 class="text-lg font-bold my-2">$1</h5>');
+    processedParagraph = processedParagraph.replace(/^#{4}\s(.+?)$/gm, '<h4 class="text-xl font-bold my-3">$1</h4>');
+    processedParagraph = processedParagraph.replace(/^#{3}\s(.+?)$/gm, '<h3 class="text-xl font-bold my-3">$1</h3>');
+    processedParagraph = processedParagraph.replace(/^#{2}\s(.+?)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>');
+    processedParagraph = processedParagraph.replace(/^#{1}\s(.+?)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>');
+    
+    // Handle lists
+    processedParagraph = processedParagraph.replace(/^\s*[-*+]\s+(.*?)$/gm, '<li>$1</li>');
+    if (processedParagraph.includes('<li>')) {
+      processedParagraph = `<ul class="list-disc pl-5 my-4">${processedParagraph}</ul>`;
+    }
+    
+    // Handle numbered lists
+    processedParagraph = processedParagraph.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<li>$2</li>');
+    if (processedParagraph.includes('<li>') && !processedParagraph.startsWith('<ul')) {
+      processedParagraph = `<ol class="list-decimal pl-5 my-4">${processedParagraph}</ol>`;
+    }
     
     // Replace bold
     processedParagraph = processedParagraph.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -167,14 +180,14 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
     processedParagraph = processedParagraph.replace(/\*(.+?)\*/g, '<em>$1</em>');
     
     // Replace inline code (but not inside already processed code blocks)
-    processedParagraph = processedParagraph.replace(/`([^`]+?)`/g, '<code>$1</code>');
+    processedParagraph = processedParagraph.replace(/`([^`]+?)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">$1</code>');
     
     // Handle line breaks within paragraphs (single newlines)
     processedParagraph = processedParagraph.replace(/\n/g, '<br>');
     
-    // If it's not a heading, wrap in paragraph tags
-    if (!/^<h[1-6]>/.test(processedParagraph)) {
-      return `<p>${processedParagraph}</p>`;
+    // If it's not a heading, list, or other HTML element, wrap in paragraph tags
+    if (!/^<(h[1-6]|ul|ol|pre)/.test(processedParagraph)) {
+      return `<p class="my-4">${processedParagraph}</p>`;
     }
     
     return processedParagraph;
