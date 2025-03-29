@@ -38,7 +38,7 @@ const SettingsPanel: React.FC = () => {
         </Tooltip>
         
         <PopoverContent 
-          className="w-80 p-4" 
+          className="w-96 p-4" 
           sideOffset={5}
           align="end"
           forceMount

@@ -43,6 +43,24 @@ const DEFAULT_PREFERENCES: UserPreferences = {
       name: 'Toggle Settings',
       keys: ['Shift', 's'],
       description: 'Open or close the settings panel'
+    },
+    focusEditor: {
+      id: 'focusEditor',
+      name: 'Focus Editor',
+      keys: ['Alt', 'e'],
+      description: 'Focus the markdown editor'
+    },
+    clearEditor: {
+      id: 'clearEditor',
+      name: 'Clear Editor',
+      keys: ['Alt', 'c'],
+      description: 'Clear the entire editor content'
+    },
+    copyContent: {
+      id: 'copyContent',
+      name: 'Copy Content',
+      keys: ['Alt', 'x'],
+      description: 'Copy all editor content to clipboard'
     }
   },
   syntaxTheme: 'tomorrow',

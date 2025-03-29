@@ -1,16 +1,38 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useSettingsStore } from '../store/settings-store';
 
 export function useKeyboardShortcuts() {
-  const { preferences, toggleSettings, isRecordingShortcut, updateShortcut } = useSettingsStore();
+  const { 
+    preferences, 
+    toggleSettings, 
+    isRecordingShortcut, 
+    updateShortcut 
+  } = useSettingsStore();
+  
+  // Create references to store callback functions
+  const editorFocusRef = useRef<HTMLTextAreaElement | null>(null);
+  const editorClearRef = useRef<((content: string) => void) | null>(null);
+  const editorCopyRef = useRef<(() => void) | null>(null);
+
+  // Register editor element and callbacks
+  const registerEditorCallbacks = (
+    editorElement: HTMLTextAreaElement | null, 
+    clearCallback: ((content: string) => void) | null,
+    copyCallback: (() => void) | null
+  ) => {
+    editorFocusRef.current = editorElement;
+    editorClearRef.current = clearCallback;
+    editorCopyRef.current = copyCallback;
+  };
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Skip if input elements are focused
+      // Skip if input elements are focused (except for specific shortcuts)
       if (
-        document.activeElement instanceof HTMLInputElement ||
-        document.activeElement instanceof HTMLTextAreaElement
+        (document.activeElement instanceof HTMLInputElement ||
+         document.activeElement instanceof HTMLTextAreaElement) &&
+        !(e.altKey && ['e', 'c', 'x'].includes(e.key.toLowerCase()))
       ) {
         return;
       }
@@ -43,20 +65,48 @@ export function useKeyboardShortcuts() {
       }
       
       // Check for shortcuts
-      const settingsShortcut = preferences.shortcuts.toggleSettings;
+      const { shortcuts } = preferences;
       
-      // Check if shortcut keys match
-      const isSettingsShortcut = checkShortcut(e, settingsShortcut.keys);
-      
-      if (isSettingsShortcut) {
-        e.preventDefault();
-        toggleSettings();
+      // Check each shortcut
+      for (const shortcutId in shortcuts) {
+        const shortcut = shortcuts[shortcutId];
+        const isShortcutTriggered = checkShortcut(e, shortcut.keys);
+        
+        if (isShortcutTriggered) {
+          e.preventDefault();
+          
+          // Handle the shortcut based on ID
+          switch (shortcutId) {
+            case 'toggleSettings':
+              toggleSettings();
+              break;
+            case 'focusEditor':
+              if (editorFocusRef.current) {
+                editorFocusRef.current.focus();
+              }
+              break;
+            case 'clearEditor':
+              if (editorClearRef.current) {
+                editorClearRef.current('');
+              }
+              break;
+            case 'copyContent':
+              if (editorCopyRef.current) {
+                editorCopyRef.current();
+              }
+              break;
+          }
+          
+          break; // Stop checking after finding a match
+        }
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [preferences.shortcuts, toggleSettings, isRecordingShortcut, updateShortcut]);
+  
+  return { registerEditorCallbacks };
 }
 
 // Helper to check if keyboard event matches shortcut keys
