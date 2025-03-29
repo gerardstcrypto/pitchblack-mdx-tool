@@ -111,12 +111,13 @@ const highlightCodeBlocks = (markdown: string): string => {
     try {
       // Make sure the language is loaded in Prism
       if (Prism.languages[prismLanguage]) {
+        // Use <br> for line breaks to preserve them in HTML
         highlighted = Prism.highlight(code, Prism.languages[prismLanguage], prismLanguage)
-          .replace(/\n/g, '<br>');
+          .split('\n').join('</br>');
       } else {
         // Fallback to markup if language isn't supported
         highlighted = Prism.highlight(code, Prism.languages.markup, 'markup')
-          .replace(/\n/g, '<br>');
+          .split('\n').join('</br>');
       }
       
       // Create a highlighted code block with language class
@@ -135,8 +136,19 @@ const highlightCodeBlocks = (markdown: string): string => {
 export const simpleMarkdownToHtml = (markdown: string): string => {
   if (!markdown) return '';
   
-  // First process links - [text](url)
-  let html = markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  // First process headings (GitHub flavored markdown)
+  let html = markdown;
+  
+  // Process headings first to avoid conflicts with other transformations
+  html = html.replace(/^# (.+?)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>');
+  html = html.replace(/^## (.+?)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>');
+  html = html.replace(/^### (.+?)$/gm, '<h3 class="text-xl font-bold my-4">$1</h3>');
+  html = html.replace(/^#### (.+?)$/gm, '<h4 class="text-lg font-bold my-3">$1</h4>');
+  html = html.replace(/^##### (.+?)$/gm, '<h5 class="text-base font-bold my-2">$1</h5>');
+  html = html.replace(/^###### (.+?)$/gm, '<h6 class="text-sm font-bold my-2">$1</h6>');
+  
+  // Process links - [text](url)
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
   
   // Then highlight code blocks
   html = highlightCodeBlocks(html);
@@ -145,21 +157,19 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
   // This approach handles paragraphs before inline formatting
   const paragraphs = html.split(/\n\n+/);
   html = paragraphs.map(paragraph => {
-    // Skip processing if this is already a code block
-    if (paragraph.trim().startsWith('<pre class="language-')) {
+    // Skip processing if this is already a code block or HTML element
+    if (paragraph.trim().startsWith('<pre class="language-') || 
+        paragraph.trim().startsWith('<h1') || 
+        paragraph.trim().startsWith('<h2') || 
+        paragraph.trim().startsWith('<h3') || 
+        paragraph.trim().startsWith('<h4') || 
+        paragraph.trim().startsWith('<h5') || 
+        paragraph.trim().startsWith('<h6')) {
       return paragraph;
     }
     
     // Apply basic markdown transformations for non-code parts
     let processedParagraph = paragraph;
-    
-    // Replace headings (but not within code blocks)
-    processedParagraph = processedParagraph.replace(/^#{6}\s(.+?)$/gm, '<h6 class="text-base font-bold my-2">$1</h6>');
-    processedParagraph = processedParagraph.replace(/^#{5}\s(.+?)$/gm, '<h5 class="text-lg font-bold my-2">$1</h5>');
-    processedParagraph = processedParagraph.replace(/^#{4}\s(.+?)$/gm, '<h4 class="text-xl font-bold my-3">$1</h4>');
-    processedParagraph = processedParagraph.replace(/^#{3}\s(.+?)$/gm, '<h3 class="text-xl font-bold my-3">$1</h3>');
-    processedParagraph = processedParagraph.replace(/^#{2}\s(.+?)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>');
-    processedParagraph = processedParagraph.replace(/^#{1}\s(.+?)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>');
     
     // Handle lists
     processedParagraph = processedParagraph.replace(/^\s*[-*+]\s+(.*?)$/gm, '<li>$1</li>');
@@ -185,8 +195,8 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
     // Handle line breaks within paragraphs (single newlines)
     processedParagraph = processedParagraph.replace(/\n/g, '<br>');
     
-    // If it's not a heading, list, or other HTML element, wrap in paragraph tags
-    if (!/^<(h[1-6]|ul|ol|pre)/.test(processedParagraph)) {
+    // If it's not a list, HTML element, or heading, wrap in paragraph tags
+    if (!/^<(h[1-6]|ul|ol|pre|li)/.test(processedParagraph)) {
       return `<p class="my-4">${processedParagraph}</p>`;
     }
     
