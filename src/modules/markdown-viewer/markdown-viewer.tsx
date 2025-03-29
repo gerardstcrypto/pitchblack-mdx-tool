@@ -1,7 +1,7 @@
 
 import React, { Suspense } from 'react';
 import { FileTreeItem } from './types';
-import { ResizablePanelGroup, ResizableHandle } from "@/components/ui/resizable";
+import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "@/components/ui/resizable";
 import SettingsPanel from './components/client/settings-panel';
 import useKeyboardShortcuts from './hooks/use-keyboard-shortcuts';
 import { useFiles } from './hooks/use-files';
