@@ -211,7 +211,7 @@ GET /api/items
 #### Get item
 
 \`\`\`http
-GET /api/items/${id}
+GET /api/items/$\{id\}
 \`\`\`
 
 ## Contributing
