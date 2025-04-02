@@ -5,7 +5,6 @@ import { FileTreeItem, UploadProgress } from '../../types';
 import { isMarkdownFile } from '../../helpers/markdown-processor';
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface FileTreeProps {
   files: FileTreeItem[];
@@ -136,15 +135,12 @@ const FileTree: React.FC<FileTreeProps> = ({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <Skeleton 
-          shimmer={true}
-          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-            isDragging
-              ? 'border-primary bg-secondary/40'
-              : 'border-muted hover:border-muted-foreground/50'
-          }`}
-        >
-          <div className="flex flex-col items-center relative z-10">
+        <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+          isDragging
+            ? 'border-primary bg-secondary/40'
+            : 'border-muted hover:border-muted-foreground/50'
+        }`}>
+          <div className="flex flex-col items-center">
             <Upload 
               className="h-6 w-6 text-muted-foreground mb-2" 
               aria-hidden="true" 
@@ -169,7 +165,7 @@ const FileTree: React.FC<FileTreeProps> = ({
               />
             </label>
           </div>
-        </Skeleton>
+        </div>
 
         {/* Upload progress indicators */}
         {hasUploadsInProgress && (
