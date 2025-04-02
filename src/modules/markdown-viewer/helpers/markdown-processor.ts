@@ -136,10 +136,24 @@ const highlightCodeBlocks = (markdown: string): string => {
 export const simpleMarkdownToHtml = (markdown: string): string => {
   if (!markdown) return '';
   
-  // First process headings (GitHub flavored markdown)
-  let html = markdown;
+  // First process code blocks
+  let html = highlightCodeBlocks(markdown);
   
-  // Process headings first to avoid conflicts with other transformations
+  // Process inline code (before other formatting to avoid conflicts)
+  html = html.replace(/`([^`\n]+)`/g, '<code class="bg-gray-800 px-1.5 py-0.5 rounded text-sm">$1</code>');
+  
+  // Process bold with both ** and __ (GitHub style)
+  html = html.replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold">$1</strong>');
+  html = html.replace(/__([^_\n]+)__/g, '<strong class="font-bold">$1</strong>');
+  
+  // Process italic with both * and _ (GitHub style)
+  html = html.replace(/\*([^*\n]+)\*/g, '<em class="italic">$1</em>');
+  html = html.replace(/_([^_\n]+)_/g, '<em class="italic">$1</em>');
+  
+  // Process strikethrough
+  html = html.replace(/~~([^~\n]+)~~/g, '<del class="line-through">$1</del>');
+  
+  // Process headings (GitHub flavored markdown)
   html = html.replace(/^# (.+?)$/gm, '<h1 class="text-3xl font-bold my-4">$1</h1>');
   html = html.replace(/^## (.+?)$/gm, '<h2 class="text-2xl font-bold my-4">$1</h2>');
   html = html.replace(/^### (.+?)$/gm, '<h3 class="text-xl font-bold my-4">$1</h3>');
@@ -150,57 +164,35 @@ export const simpleMarkdownToHtml = (markdown: string): string => {
   // Process links - [text](url)
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
   
-  // Then highlight code blocks
-  html = highlightCodeBlocks(html);
+  // Process blockquotes
+  html = html.replace(/^>\s*(.*?)$/gm, '<blockquote class="border-l-4 border-gray-500 pl-4 py-1 italic">$1</blockquote>');
+  
+  // Handle lists
+  html = html.replace(/^\s*[-*+]\s+(.*?)$/gm, '<li>$1</li>');
+  const ulPattern = /(<li>.*?<\/li>)(?:\n<li>.*?<\/li>)+/g;
+  html = html.replace(ulPattern, '<ul class="list-disc pl-5 my-4">$&</ul>');
+  
+  // Handle numbered lists
+  html = html.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<li>$2</li>');
+  const olPattern = /(<li>.*?<\/li>)(?:\n<li>.*?<\/li>)+/g;
+  html = html.replace(olPattern, match => {
+    if (!match.startsWith('<ul')) {
+      return `<ol class="list-decimal pl-5 my-4">${match}</ol>`;
+    }
+    return match;
+  });
   
   // Process paragraphs - split by double newlines first (to preserve intended paragraphs)
-  // This approach handles paragraphs before inline formatting
   const paragraphs = html.split(/\n\n+/);
   html = paragraphs.map(paragraph => {
-    // Skip processing if this is already a code block or HTML element
-    if (paragraph.trim().startsWith('<pre class="language-') || 
-        paragraph.trim().startsWith('<h1') || 
-        paragraph.trim().startsWith('<h2') || 
-        paragraph.trim().startsWith('<h3') || 
-        paragraph.trim().startsWith('<h4') || 
-        paragraph.trim().startsWith('<h5') || 
-        paragraph.trim().startsWith('<h6')) {
+    // Skip processing if this is already an HTML element
+    if (paragraph.trim().startsWith('<') || paragraph.trim() === '') {
       return paragraph;
     }
     
-    // Apply basic markdown transformations for non-code parts
-    let processedParagraph = paragraph;
-    
-    // Handle lists
-    processedParagraph = processedParagraph.replace(/^\s*[-*+]\s+(.*?)$/gm, '<li>$1</li>');
-    if (processedParagraph.includes('<li>')) {
-      processedParagraph = `<ul class="list-disc pl-5 my-4">${processedParagraph}</ul>`;
-    }
-    
-    // Handle numbered lists
-    processedParagraph = processedParagraph.replace(/^\s*(\d+)\.\s+(.*?)$/gm, '<li>$2</li>');
-    if (processedParagraph.includes('<li>') && !processedParagraph.startsWith('<ul')) {
-      processedParagraph = `<ol class="list-decimal pl-5 my-4">${processedParagraph}</ol>`;
-    }
-    
-    // Replace bold
-    processedParagraph = processedParagraph.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    
-    // Replace italic
-    processedParagraph = processedParagraph.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    
-    // Replace inline code (but not inside already processed code blocks)
-    processedParagraph = processedParagraph.replace(/`([^`]+?)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm">$1</code>');
-    
-    // Handle line breaks within paragraphs (single newlines)
-    processedParagraph = processedParagraph.replace(/\n/g, '<br>');
-    
-    // If it's not a list, HTML element, or heading, wrap in paragraph tags
-    if (!/^<(h[1-6]|ul|ol|pre|li)/.test(processedParagraph)) {
-      return `<p class="my-4">${processedParagraph}</p>`;
-    }
-    
-    return processedParagraph;
+    // Replace line breaks with <br>
+    const processedParagraph = paragraph.replace(/\n/g, '<br>');
+    return `<p class="my-4">${processedParagraph}</p>`;
   }).join('\n\n');
   
   return html;

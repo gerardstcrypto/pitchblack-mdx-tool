@@ -124,13 +124,13 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       case 'bulletList':
         if (selectedText.includes('\n')) {
           // Multiple lines - add bullet to each line
-          const lines = selectedText.split('\n');
-          const bulletedLines = lines.map(line => `- ${line}`).join('\n');
+          const bulletedLines = selectedText.split('\n').map(line => `- ${line}`).join('\n');
           newText = `${beforeSelection}${bulletedLines}${afterSelection}`;
+          newCursorPos = beforeSelection.length + bulletedLines.length;
         } else {
           newText = `${beforeSelection}- ${selectedText || 'List item'}${afterSelection}`;
+          newCursorPos = selectedText ? currentSelection.end + 2 : currentSelection.start + 11;
         }
-        newCursorPos = selectedText ? beforeSelection.length + (selectedText.includes('\n') ? selectedText.length + lines.length * 2 : selectedText.length + 2) : currentSelection.start + 11;
         break;
       case 'numberedList':
         if (selectedText.includes('\n')) {
@@ -138,21 +138,22 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
           const lines = selectedText.split('\n');
           const numberedLines = lines.map((line, i) => `${i + 1}. ${line}`).join('\n');
           newText = `${beforeSelection}${numberedLines}${afterSelection}`;
+          newCursorPos = beforeSelection.length + numberedLines.length;
         } else {
           newText = `${beforeSelection}1. ${selectedText || 'List item'}${afterSelection}`;
+          newCursorPos = selectedText ? currentSelection.end + 3 : currentSelection.start + 12;
         }
-        newCursorPos = selectedText ? beforeSelection.length + (selectedText.includes('\n') ? selectedText.length + lines.length * 3 : selectedText.length + 3) : currentSelection.start + 12;
         break;
       case 'quote':
         if (selectedText.includes('\n')) {
           // Multiple lines - add quote to each line
-          const lines = selectedText.split('\n');
-          const quotedLines = lines.map(line => `> ${line}`).join('\n');
+          const quotedLines = selectedText.split('\n').map(line => `> ${line}`).join('\n');
           newText = `${beforeSelection}${quotedLines}${afterSelection}`;
+          newCursorPos = beforeSelection.length + quotedLines.length;
         } else {
           newText = `${beforeSelection}> ${selectedText || 'Blockquote'}${afterSelection}`;
+          newCursorPos = selectedText ? currentSelection.end + 2 : currentSelection.start + 12;
         }
-        newCursorPos = selectedText ? beforeSelection.length + (selectedText.includes('\n') ? selectedText.length + lines.length * 2 : selectedText.length + 2) : currentSelection.start + 12;
         break;
       case 'link':
         newText = `${beforeSelection}[${selectedText || 'Link text'}](url)${afterSelection}`;

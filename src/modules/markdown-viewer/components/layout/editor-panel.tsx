@@ -10,7 +10,7 @@ interface EditorPanelProps {
 
 const EditorPanel: React.FC<EditorPanelProps> = ({ content, onChange }) => {
   return (
-    <ResizablePanel defaultSize={50} className="min-h-0 flex flex-col">
+    <ResizablePanel defaultSize={50} className="min-h-0 flex flex-col bg-background/80 backdrop-blur-sm">
       <Editor 
         content={content} 
         onChange={onChange} 
