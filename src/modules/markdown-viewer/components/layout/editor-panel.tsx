@@ -1,8 +1,7 @@
 
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { ResizablePanel } from "@/components/ui/resizable";
-
-const Editor = lazy(() => import('../client/editor'));
+import Editor from '../client/editor';
 
 interface EditorPanelProps {
   content: string;
@@ -12,12 +11,10 @@ interface EditorPanelProps {
 const EditorPanel: React.FC<EditorPanelProps> = ({ content, onChange }) => {
   return (
     <ResizablePanel defaultSize={50}>
-      <Suspense fallback={<div className="p-4">Loading editor...</div>}>
-        <Editor 
-          content={content} 
-          onChange={onChange} 
-        />
-      </Suspense>
+      <Editor 
+        content={content} 
+        onChange={onChange} 
+      />
     </ResizablePanel>
   );
 };

@@ -269,8 +269,8 @@ const TemplateButton: React.FC<TemplateButtonProps> = ({ onInsert }) => {
           <TooltipContent>
             <p>Insert template</p>
           </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+        </Popover>
+      </Tooltip>
     </TooltipProvider>
   );
 };
