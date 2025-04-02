@@ -44,6 +44,51 @@ const MdxRenderer: React.FC<MdxRendererProps> = ({ content }) => {
       return `<pre class="language-${lang} overflow-x-auto max-w-full rounded-md p-4 my-4"><code class="language-${lang}">${processedCode}</code></pre>`;
     })
     
+    // Process GitHub-flavored markdown callouts
+    .replace(/>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*\n((?:>\s*.*(?:\n|$))*)/gm, (_, type, content) => {
+      const calloutContent = content.replace(/>\s*/g, '').trim();
+      const calloutType = type.toLowerCase();
+      
+      let bgColor = 'bg-blue-50 dark:bg-blue-950';
+      let borderColor = 'border-blue-200 dark:border-blue-800';
+      let iconClass = 'text-blue-500';
+      let titleClass = 'text-blue-700 dark:text-blue-300';
+      
+      switch (calloutType) {
+        case 'tip':
+          bgColor = 'bg-green-50 dark:bg-green-950';
+          borderColor = 'border-green-200 dark:border-green-800';
+          iconClass = 'text-green-500';
+          titleClass = 'text-green-700 dark:text-green-300';
+          break;
+        case 'warning':
+        case 'caution':
+          bgColor = 'bg-amber-50 dark:bg-amber-950';
+          borderColor = 'border-amber-200 dark:border-amber-800';
+          iconClass = 'text-amber-500';
+          titleClass = 'text-amber-700 dark:text-amber-300';
+          break;
+        case 'important':
+          bgColor = 'bg-red-50 dark:bg-red-950';
+          borderColor = 'border-red-200 dark:border-red-800';
+          iconClass = 'text-red-500';
+          titleClass = 'text-red-700 dark:text-red-300';
+          break;
+      }
+      
+      return `<div class="rounded-md ${bgColor} border ${borderColor} p-4 my-4">
+        <div class="flex items-center">
+          <svg class="h-5 w-5 ${iconClass} mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12" y2="16"></line>
+          </svg>
+          <span class="font-medium ${titleClass}">${type}</span>
+        </div>
+        <div class="mt-2">${calloutContent}</div>
+      </div>`;
+    })
+    
     // Process inline code with backticks (before other formatting)
     .replace(/`([^`\n]+)`/g, '<code class="bg-gray-800 px-1.5 py-0.5 rounded text-sm">$1</code>')
     

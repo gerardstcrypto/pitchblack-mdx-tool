@@ -9,6 +9,7 @@ import { useEditorContent } from './hooks/use-editor-content';
 import SidebarPanel from './components/layout/sidebar-panel';
 import EditorPanel from './components/layout/editor-panel';
 import PreviewPanel from './components/layout/preview-panel';
+import { toast } from 'sonner';
 
 // This represents a module facade that will be rendered in the page
 const MarkdownViewer: React.FC = () => {
@@ -26,7 +27,8 @@ const MarkdownViewer: React.FC = () => {
     handleSelectFile,
     handleDeleteFile,
     handleClearAll,
-    setFiles
+    setFiles,
+    handleSaveNewFile
   } = useFiles();
 
   // Use editor content hook
@@ -45,6 +47,19 @@ const MarkdownViewer: React.FC = () => {
 
   // Get the content to display
   const selectedFileContent = getSelectedFileContent();
+
+  // Handle save action
+  const handleSave = () => {
+    if (selectedFileId) {
+      // Just update the UI since the content is already being saved on change
+      toast.success("File saved successfully");
+    } else if (editorContent.trim()) {
+      // Save as a new file if there's content but no selected file
+      handleSaveNewFile(editorContent);
+    } else {
+      toast.error("Nothing to save");
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex flex-col">
@@ -74,7 +89,8 @@ const MarkdownViewer: React.FC = () => {
               {/* Editor panel */}
               <EditorPanel 
                 content={editorContent} 
-                onChange={handleEditorChange} 
+                onChange={handleEditorChange}
+                onSave={handleSave}
               />
               
               <ResizableHandle withHandle />

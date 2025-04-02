@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import CopyButton from './copy-button';
 import PasteButton from './paste-button';
@@ -15,7 +14,6 @@ interface EditorProps {
 }
 
 const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
-  // Use ResizeObserver to prevent layout shifts
   const editorRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [selection, setSelection] = useState<{ start: number; end: number } | null>(null);
@@ -23,7 +21,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const { registerEditorCallbacks } = useKeyboardShortcuts();
   
   useEffect(() => {
-    // Prevent layout shift by setting min-height based on initial render
     if (editorRef.current) {
       const minHeight = `${editorRef.current.scrollHeight}px`;
       editorRef.current.style.minHeight = minHeight;
@@ -31,7 +28,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   }, []);
 
   useEffect(() => {
-    // Register the editor element and callbacks
     const handleClearEditor = (newContent: string) => {
       onChange(newContent);
       toast.success('Editor cleared');
@@ -50,7 +46,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     registerEditorCallbacks(textareaRef.current, handleClearEditor, handleCopyContent);
   }, [content, onChange, registerEditorCallbacks]);
 
-  // Track textarea selection
   const handleSelectionChange = () => {
     if (textareaRef.current) {
       setSelection({
@@ -72,7 +67,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     }
   };
 
-  // Handle markdown formatting actions
   const handleToolbarAction = (action: string, sel?: { start: number; end: number }) => {
     if (!textareaRef.current) return;
     
@@ -112,18 +106,15 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         break;
       case 'code':
         if (selectedText.includes('\n')) {
-          // Multiline code block
           newText = `${beforeSelection}\`\`\`\n${selectedText || 'code block'}\n\`\`\`${afterSelection}`;
           newCursorPos = selectedText ? currentSelection.end + 8 : currentSelection.start + 14;
         } else {
-          // Inline code
           newText = `${beforeSelection}\`${selectedText || 'code'}\`${afterSelection}`;
           newCursorPos = selectedText ? currentSelection.end + 2 : currentSelection.start + 6;
         }
         break;
       case 'bulletList':
         if (selectedText.includes('\n')) {
-          // Multiple lines - add bullet to each line
           const bulletedLines = selectedText.split('\n').map(line => `- ${line}`).join('\n');
           newText = `${beforeSelection}${bulletedLines}${afterSelection}`;
           newCursorPos = beforeSelection.length + bulletedLines.length;
@@ -134,7 +125,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         break;
       case 'numberedList':
         if (selectedText.includes('\n')) {
-          // Multiple lines - add numbers to each line
           const lines = selectedText.split('\n');
           const numberedLines = lines.map((line, i) => `${i + 1}. ${line}`).join('\n');
           newText = `${beforeSelection}${numberedLines}${afterSelection}`;
@@ -146,7 +136,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         break;
       case 'quote':
         if (selectedText.includes('\n')) {
-          // Multiple lines - add quote to each line
           const quotedLines = selectedText.split('\n').map(line => `> ${line}`).join('\n');
           newText = `${beforeSelection}${quotedLines}${afterSelection}`;
           newCursorPos = beforeSelection.length + quotedLines.length;
@@ -159,13 +148,28 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
         newText = `${beforeSelection}[${selectedText || 'Link text'}](url)${afterSelection}`;
         newCursorPos = selectedText ? currentSelection.end + 3 : currentSelection.start + 15;
         break;
+      case 'note':
+        newText = `${beforeSelection}> [!NOTE]\n> ${selectedText || 'This is a note'}${afterSelection}`;
+        newCursorPos = selectedText ? beforeSelection.length + 11 + selectedText.length + 3 : beforeSelection.length + 27;
+        break;
+      case 'warning':
+        newText = `${beforeSelection}> [!WARNING]\n> ${selectedText || 'This is a warning'}${afterSelection}`;
+        newCursorPos = selectedText ? beforeSelection.length + 14 + selectedText.length + 3 : beforeSelection.length + 30;
+        break;
+      case 'tip':
+        newText = `${beforeSelection}> [!TIP]\n> ${selectedText || 'This is a tip'}${afterSelection}`;
+        newCursorPos = selectedText ? beforeSelection.length + 10 + selectedText.length + 3 : beforeSelection.length + 26;
+        break;
+      case 'important':
+        newText = `${beforeSelection}> [!IMPORTANT]\n> ${selectedText || 'This is important information'}${afterSelection}`;
+        newCursorPos = selectedText ? beforeSelection.length + 16 + selectedText.length + 3 : beforeSelection.length + 32;
+        break;
       default:
         return;
     }
     
     onChange(newText);
     
-    // Reset selection and focus
     setTimeout(() => {
       if (textareaRef.current) {
         textareaRef.current.focus();
@@ -175,12 +179,10 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     }, 0);
   };
 
-  // Register keyboard shortcuts for markdown formatting
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target !== textareaRef.current) return;
       
-      // Check for formatting shortcuts
       if (e.ctrlKey) {
         switch (e.key.toLowerCase()) {
           case 'b':
@@ -249,7 +251,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     <div className="relative h-full flex flex-col" ref={editorRef}>
       <div className="flex items-center justify-between p-2 border-b border-muted h-10 shrink-0">
         <div className="flex items-center gap-1">
-          <span className="text-sm font-medium">Markdown Input</span>
           <TemplateButton onInsert={handleInsertTemplate} />
         </div>
         <div className="flex items-center gap-1">

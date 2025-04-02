@@ -10,7 +10,11 @@ import {
   Link,
   Heading1,
   Heading2,
-  Heading3
+  Heading3,
+  AlertTriangle,
+  Info,
+  CheckCircle,
+  AlertOctagon
 } from 'lucide-react';
 import { 
   Tooltip,
@@ -99,11 +103,36 @@ const MarkdownToolbar: React.FC<MarkdownToolbarProps> = ({
       action: 'link',
       shortcut: 'Ctrl+L',
       tooltip: 'Link (Ctrl+L)'
+    },
+    // GitHub-flavored markdown additions
+    { 
+      icon: Info, 
+      name: 'Note', 
+      action: 'note',
+      tooltip: 'Note Block'
+    },
+    { 
+      icon: AlertTriangle, 
+      name: 'Warning', 
+      action: 'warning',
+      tooltip: 'Warning Block'
+    },
+    { 
+      icon: CheckCircle, 
+      name: 'Tip', 
+      action: 'tip',
+      tooltip: 'Tip Block'
+    },
+    { 
+      icon: AlertOctagon, 
+      name: 'Important', 
+      action: 'important',
+      tooltip: 'Important Block'
     }
   ];
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-md markdown-toolbar">
+    <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-md markdown-toolbar flex-wrap">
       {tools.map((tool) => (
         <TooltipProvider key={tool.action} delayDuration={300}>
           <Tooltip>

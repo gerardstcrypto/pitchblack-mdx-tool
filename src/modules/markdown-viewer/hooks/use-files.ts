@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react';
 import { MarkdownFile, UploadProgress } from '../types';
 import { processMarkdownFile } from '../helpers/markdown-processor';
 import { toast } from "sonner";
+import { generateId } from '../helpers/markdown-processor';
 
 export function useFiles() {
   // State for markdown files
@@ -100,6 +101,21 @@ export function useFiles() {
     toast.success('All files cleared');
   }, []);
 
+  // Handle saving new file
+  const handleSaveNewFile = useCallback((content: string) => {
+    const newFileId = generateId();
+    const newFile: MarkdownFile = {
+      id: newFileId,
+      name: `untitled-${newFileId.substring(0, 4)}.md`,
+      content,
+      createdAt: new Date(),
+    };
+    
+    setFiles(prevFiles => [...prevFiles, newFile]);
+    setSelectedFileId(newFileId);
+    toast.success(`File saved as ${newFile.name}`);
+  }, []);
+
   return {
     files,
     selectedFileId,
@@ -108,6 +124,7 @@ export function useFiles() {
     handleSelectFile,
     handleDeleteFile,
     handleClearAll,
+    handleSaveNewFile,
     setFiles
   };
 }
