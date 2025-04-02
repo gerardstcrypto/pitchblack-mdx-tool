@@ -2,6 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import CopyButton from './copy-button';
 import PasteButton from './paste-button';
+import TemplateButton from './template-button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import useKeyboardShortcuts from '../../hooks/use-keyboard-shortcuts';
@@ -51,10 +52,21 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     onChange(content + text);
   };
 
+  const handleInsertTemplate = (template: string) => {
+    onChange(template);
+    toast.success('Template inserted');
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
   return (
     <div className="relative h-full flex flex-col" ref={editorRef}>
       <div className="flex items-center justify-between p-2 border-b border-muted h-10 shrink-0">
-        <span className="text-sm font-medium">Markdown Input</span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm font-medium">Markdown Input</span>
+          <TemplateButton onInsert={handleInsertTemplate} />
+        </div>
         <div className="flex items-center gap-1">
           <PasteButton onPaste={handlePaste} />
           <CopyButton textToCopy={content} />

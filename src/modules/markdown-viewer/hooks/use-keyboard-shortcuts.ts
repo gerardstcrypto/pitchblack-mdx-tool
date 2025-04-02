@@ -28,39 +28,17 @@ export function useKeyboardShortcuts() {
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if we're recording a shortcut
+      if (isRecordingShortcut) {
+        return;
+      }
+      
       // Skip if input elements are focused (except for specific shortcuts)
       if (
         (document.activeElement instanceof HTMLInputElement ||
          document.activeElement instanceof HTMLTextAreaElement) &&
         !(e.altKey && ['e', 'c', 'x'].includes(e.key.toLowerCase()))
       ) {
-        return;
-      }
-      
-      // If we're recording a shortcut
-      if (isRecordingShortcut) {
-        // Prevent default behavior
-        e.preventDefault();
-        
-        const keys = [];
-        if (e.ctrlKey) keys.push('Ctrl');
-        if (e.altKey) keys.push('Alt');
-        if (e.shiftKey) keys.push('Shift');
-        if (e.metaKey) keys.push('Meta');
-        
-        // Add the key if it's not a modifier
-        if (
-          !['Control', 'Alt', 'Shift', 'Meta'].includes(e.key) &&
-          !keys.includes(e.key)
-        ) {
-          keys.push(e.key.toLowerCase());
-        }
-        
-        // Only update if we have at least one key
-        if (keys.length > 0) {
-          updateShortcut(isRecordingShortcut, keys);
-        }
-        
         return;
       }
       
