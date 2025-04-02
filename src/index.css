@@ -172,4 +172,30 @@
     50% { background-position: 100% 50% }
     100% { background-position: 0% 50% }
   }
+
+  /* Markdown toolbar styling */
+  .markdown-toolbar {
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .toolbar-btn {
+    transition: all 0.2s ease;
+  }
+
+  .toolbar-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .toolbar-btn:active {
+    transform: translateY(0);
+  }
+
+  /* Fix button height for toolbar */
+  .markdown-toolbar .toolbar-btn {
+    height: 28px;
+    min-width: 28px;
+  }
 }
